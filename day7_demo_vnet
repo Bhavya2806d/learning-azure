@@ -1,0 +1,43 @@
+  user ->access through ipaddress(firewallpublicipaddress):portno [4000] ->firewall bypass request to vm-> here nginx install ->run static html page
+
+  vnet 
+  divided into subnet
+  -firewall ->additionally firewall management subnet
+  -bastion(as we use vm private address)
+  -default( deploy our vm)
+
+  in vm - install ngnix -deploy static html page
+
+  1)resource group
+  2)vnet -bastion, firewall, add new policy in firewall
+  3)vm [azure custom data -use at time of autoscaling, user data -persist in your vm  throughout  lifetime]
+  4)connect through bastion [username-azureuser , upload pem file, authentication type-ssh]
+  {
+  sudo su -
+  apt update
+  apt install nginx
+  systemctl start nginx
+  cd /var/www/html
+  ls
+  vim index.html [add your static html page]
+  systemctl restart nginx
+  }
+  5)firewall policy 
+    use dnat rules -network address translation rule
+    add rule collection
+      name-rule_coll_for_nginx
+      priority-100 [least no=max priority, range 100-65000]
+    add rule
+      name-nginx_rule
+      source type-ip address
+      source -only through your laptop ip address [ all-*]
+      destination ip address-firewall ip public address
+      protocol-tcp
+      destination port-4000
+      translated type- ip address
+      translated address-vm private address
+      translated port-80
+    {nginx run port 80- check bastion-curl localhost:80 [http 80, https 443]}
+chrome browser-
+  http://fwpublicipaddress:4000
+  
